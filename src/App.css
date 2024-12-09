@@ -1,0 +1,45 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure the app takes full width and height */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+}
+
+/* Style the main app container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Style the main content area */
+.main-content {
+  flex: 1;
+  width: 100%;
+  /*max-width: 1200px; !* Adjust this value as needed *!*/
+  margin: 0 auto;
+  background-color: #fff;
+  /*padding: 0 20px; !* Add some padding on smaller screens *!*/
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0 10px;
+  }
+}
+

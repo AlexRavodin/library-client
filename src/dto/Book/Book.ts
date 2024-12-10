@@ -4,7 +4,7 @@ import Author from "@/dto/Author/Author.ts";
 export interface Book {
     id: number;
     title: string;
-    full_amount: number;
+    amount: number;
     description: string;
     image_url: string;
     author: Author;

@@ -1,77 +1,89 @@
-﻿import {createContext, useContext, useState, useEffect} from 'react';
+﻿import React, {createContext, useContext, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import {User} from "@/dto/User.ts";
+import {API_BASE_URL} from "@/constants.ts";
+import {AuthContextType} from "@/context/AuthContext.ts";
 
-const AuthContext = createContext<User | null>(null);
+const Axios = axios.create({
+    baseURL: `${API_BASE_URL}/auth`
+});
 
-const AuthProvider = ({children}: any) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token') || '');
+export interface AuthProviderProps {
+    children: React.ReactNode;
+}
+
+const AuthProvider = ({children}: AuthProviderProps) => {
+    const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
 
-
-    const loginAction = async (email: string, password: string) => {
+    const login = async (email: string, password: string) => {
         try {
-            const response = await axios.post('your-api-endpoint/auth/login', {
+            const response = await Axios.post('/login', {
                 email,
                 password
             }, {
                 withCredentials: true,
             });
             const res = response.data;
-            if (res.data) {
-                setUser(res.data.user);
-                setToken(res.token);
-                localStorage.setItem('token', res.token);
+            if (res) {
+                setUser(res);
             }
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                console.error(error.message);
-            } else {
-                console.error('Unknown error:', error);
-            }
+            console.error('Unknown error while login: ', error);
         }
     };
 
     const logout = () => {
         setUser(null);
-        setToken('');
         localStorage.removeItem('token');
+
+        console.log("User logged out.");
         navigate('/login');
     };
 
     const fetchUserData = async () => {
         try {
-            const response = await axios.get('your-api-endpoint/user-info', {
+            const response = await axios.get('/user-info', {
                 withCredentials: true,
             });
+
+            setUser(response.data);
+
+            if (response.status == 401) {
+                console.error('Not authorized: ', response.data);
+                navigate('/login');
+            }
+
             const userData = response.data;
             setUser(userData);
-        } catch (error: unknown) {
-            if (error instanceof Error && response === 401) {
-                logout();
-            } else if (error instanceof Error) {
-                console.error(error.message);
-            } else {
-                console.error('Unknown error:', error);
-            }
+        } catch (error) {
+            console.error('Error: ', error);
         }
     };
 
     useEffect(() => {
-        if (token) {
-            fetchUserData();
-        }
-    }, [token]);
+        fetchUserData();
+    }, [fetchUserData, user]);
+
+
 
     return (
-        <AuthContext.Provider value={{user, loginAction, logout, fetchUserData}}>
+        <AuthContext.Provider value={{user, login: login, logout, fetchUserData}}>
             {children}
         </AuthContext.Provider>
     );
 
 }
+
+const InitialState: AuthContextType = {
+    user: null,
+    login: async () => Promise.resolve(),
+    logout: () => {},
+    fetchUserData: async () => Promise.resolve(),
+};
+
+const AuthContext = createContext<AuthContextType>(InitialState);
 
 export const useAuth = () => useContext(AuthContext);
 

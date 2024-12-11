@@ -25,7 +25,7 @@ const AuthProvider = ({children}: AuthProviderProps) => {
             }, {
                 withCredentials: true,
             });
-            const res = response.data;
+            const res: User = response.data;
             if (res) {
                 setUser(res);
             }
@@ -44,7 +44,7 @@ const AuthProvider = ({children}: AuthProviderProps) => {
 
     const fetchUserData = async () => {
         try {
-            const response = await axios.get('/user-info', {
+            const response = await Axios.get('/user-info', {
                 withCredentials: true,
             });
 

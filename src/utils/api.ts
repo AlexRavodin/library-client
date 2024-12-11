@@ -1,16 +1,25 @@
 import {Book} from '../dto/Book/Book.ts';
-import {Genre} from '../dto/Genre/Genre.ts';
+import Genre from '../dto/Genre/Genre.ts';
 import {BookFilters} from "@/dto/Book/BookFilters.ts";
-import {Author} from "@/dto/Author/Author.ts";
+import Author from "@/dto/Author/Author.ts";
 import {API_BASE_URL} from "@/constants.ts";
-import axios, { AxiosResponse } from 'axios';
-import ApiResponse from "@/dto/ApiResponse.ts";
+import axios, {AxiosResponse} from 'axios';
+import {ApiResponse} from "@/dto/ApiResponse.ts";
+import {ApiPaginatedResponse} from "@/dto/ApiPaginatedResponse.ts";
 
+const Axios = axios.create({
+    baseURL: `${API_BASE_URL}/auth`
+});
 
-/*export async function getBooks(page: number, filters: BookFilters): Promise<{ books: Book[], total: number }> {
-    const response: AxiosResponse<ApiResponse<Book[]>> = await axios.get(API_BASE_URL + '/books');
+export async function getBooks(page: number, filters: BookFilters): Promise<ApiPaginatedResponse<Book[]>> {
+    const response: AxiosResponse<ApiPaginatedResponse<Book[]>> = await Axios.get('/books', {
+        params: filters,
+        withCredentials: true
+    });
 
     console.log('Response: ' + response.data);
+
+    
 
     const books: Book[] = Array.from({length: 10}, (_, i) => ({
         id: `book-${page}-${i}`,
@@ -20,23 +29,7 @@ import ApiResponse from "@/dto/ApiResponse.ts";
         coverUrl: `/placeholder.svg?height=200&width=150&text=Book+${page * 10 + i + 1}`
     }));
 
-    return {books, total: 100};
-}*/
-
-export async function getBooks(page: number, filters: BookFilters): Promise<{ books: Book[], total: number }> {
-    const response: AxiosResponse<ApiResponse<Book[]>> = await axios.get(API_BASE_URL + '/books');
-
-    console.log('Response: ' + response.data);
-
-    const books: Book[] = Array.from({length: 10}, (_, i) => ({
-        id: `book-${page}-${i}`,
-        title: `Book Title ${page * 10 + i + 1}`,
-        author: `Author ${page * 10 + i + 1}`,
-        genre: ['Fiction', 'Mystery'],
-        coverUrl: `/placeholder.svg?height=200&width=150&text=Book+${page * 10 + i + 1}`
-    }));
-
-    return {books, total: 100};
+    return response;
 }
 
 export async function getGenres(): Promise<Genre[]> {

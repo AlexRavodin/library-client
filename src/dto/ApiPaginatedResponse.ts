@@ -3,4 +3,9 @@ export interface ApiPaginatedResponse<T> {
     responseCode: number;
     data?: T;
     errorMessage?: string;
+    metadata: {
+        total: number,
+        currentPage: number,
+        totalPages: number,
+    };
 }

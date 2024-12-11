@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Select } from "@/components/ui/select"
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
-import { Book} from '@/dto/Book/Book.ts'
-import { Author } from '@/dto/Author/Author.ts'
-import { Genre } from '@/dto/Genre/Genre.ts'
-import { getBookById, getAuthors, getGenres, updateBook } from '@/utils/api'
+import React, {useState, useEffect} from 'react'
+import {useParams, useNavigate} from 'react-router-dom'
+import {Input} from "@/components/ui/input"
+import {Label} from "@/components/ui/label"
+import {Button} from "@/components/ui/button"
+import {Select} from "@/components/ui/select"
+import {Card, CardHeader, CardTitle, CardContent, CardFooter} from "@/components/ui/card"
+import {Book} from '@/dto/Book/Book.ts'
+import Author from '@/dto/Author/Author.ts'
+import Genre from '@/dto/Genre/Genre.ts'
+import {getBookById, getAuthors, getGenres, updateBook} from '@/utils/api'
+import GenreItem from "@/dto/Genre/GenreItem.ts";
 
 export function EditBookPage() {
-    const { id } = useParams<{ id: string }>()
+    const {id} = useParams<{ id: string }>()
     const navigate = useNavigate()
     const [book, setBook] = useState<Book | null>(null)
     const [authors, setAuthors] = useState<Author[]>([])
     const [genres, setGenres] = useState<Genre[]>([])
-    const [selectedGenres, setSelectedGenres] = useState<string[]>([])
+    const [selectedGenres, setSelectedGenres] = useState<GenreItem[]>([])
     const [genreSearch, setGenreSearch] = useState('')
     const [coverFile, setCoverFile] = useState<File | null>(null)
 
@@ -30,16 +31,16 @@ export function EditBookPage() {
 
     useEffect(() => {
         if (book) {
-            setSelectedGenres(book.genre)
+            setSelectedGenres(book.genres.map(g => { g.id, g.name]}))
         }
     }, [book])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (book) {
-            const updatedBook = { ...book, genre: selectedGenres }
+            const updatedBook = {...book, genre: selectedGenres}
             if (coverFile) {
-                updatedBook.coverUrl = URL.createObjectURL(coverFile)
+                updatedBook.image_url = URL.createObjectURL(coverFile)
             }
             await updateBook(updatedBook)
             navigate(`/books/${book.id}`)
@@ -65,7 +66,7 @@ export function EditBookPage() {
                             <Input
                                 id="title"
                                 value={book.title}
-                                onChange={(e) => setBook({ ...book, title: e.target.value })}
+                                onChange={(e) => setBook({...book, title: e.target.value})}
                                 required
                             />
                         </div>
@@ -74,8 +75,10 @@ export function EditBookPage() {
                             <Select
                                 className="main-content"
                                 id="author"
-                                value={book.author}
-                                onChange={(e) => setBook({ ...book, author: e.target.value })}
+                                value={book.author.first_name}
+                                onChange={(e) => setBook(
+                                    {...book, author: e.target.value}
+                                )}
                                 required
                             >
                                 {authors.map((author) => (
@@ -122,11 +125,11 @@ export function EditBookPage() {
                                 onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
                             />
                         </div>
-                        {(book.coverUrl || coverFile) && (
+                        {(book.image_url || coverFile) && (
                             <div>
                                 <Label>Current Cover</Label>
                                 <img
-                                    src={coverFile ? URL.createObjectURL(coverFile) : book.coverUrl}
+                                    src={coverFile ? URL.createObjectURL(coverFile) : book.image_url}
                                     alt="Book cover"
                                     className="w-32 h-48 object-cover"
                                 />

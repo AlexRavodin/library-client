@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react'
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
-import { Genre } from '@/dto/Genre/Genre.ts'
-import { BookFilters } from '@/dto/Book/BookFilters.ts'
-import { getGenres } from '@/utils/api'
+import React, {useState, useEffect} from 'react'
+import {Input} from "@/components/ui/input"
+import {Label} from "@/components/ui/label"
+import {Checkbox} from "@/components/ui/checkbox"
+import {Button} from "@/components/ui/button"
+import {BookFilters} from '@/dto/Book/BookFilters.ts'
+import {getGenres} from '@/utils/api'
+import GenreItem from "@/dto/Genre/GenreItem.ts";
 
 interface FiltersProps {
     onFilterChange: (filters: BookFilters) => void;
 }
 
-export function Filters({ onFilterChange }: FiltersProps) {
+export function Filters({onFilterChange}: FiltersProps) {
     const [title, setTitle] = useState('')
     const [author, setAuthor] = useState('')
-    const [genres, setGenres] = useState<Genre[]>([])
+    const [genres, setGenres] = useState<GenreItem[]>([])
     const [selectedGenres, setSelectedGenres] = useState<string[]>([])
 
     useEffect(() => {
@@ -23,7 +23,7 @@ export function Filters({ onFilterChange }: FiltersProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onFilterChange({ title, author, genres: selectedGenres })
+        onFilterChange({title, author, genres: selectedGenres})
     }
 
     return (

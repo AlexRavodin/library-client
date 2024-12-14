@@ -1,5 +1,5 @@
-import Author from "@/dto/Author/Author.ts";
-import Genre from "@/dto/Genre/Genre.ts";
+import Author from "@/dto/author/Author.ts";
+import Genre from "@/dto/genre/Genre.ts";
 
 export default interface BookItem {
     id: number;

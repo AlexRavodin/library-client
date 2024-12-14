@@ -1,20 +1,47 @@
-import { useState, useEffect } from 'react'
+import {useState, useEffect, useContext} from 'react'
 import { BookCard } from '@/components/layout/Book/BookCard'
 import { Filters } from '@/components/layout/Book/Filters'
 import { Pagination } from '@/components/layout/Book/Paginration'
 import { getBooks } from '@/utils/api'
-import { Book } from '@/dto/Book/Book.ts'
-import {BookFilters} from "@/dto/Book/BookFilters.ts";
+import { Book } from '@/dto/book/Book.ts'
+import {BookFilters} from "@/dto/book/BookFilters.ts";
+import {UseDataFetch} from "@/hooks/UseDataFetch.ts";
+import {useAuth} from "@/utils/AuthProvider.tsx";
+import {AdminRole, UserRole} from "@/utils/constants.ts";
+import {UsePaginatedDataFetch} from "@/hooks/UsePaginatedDataFetch.ts";
+
+const pageSize = 10;
 
 export default function BookCatalogPage() {
+    const authContext = useAuth();
+
+    if (authContext.user?.role !== UserRole && authContext.user?.role !== AdminRole)
+    {
+
+    }
+
     const [books, setBooks] = useState<Book[]>([])
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
     const [filters, setFilters] = useState({})
 
+    const { data, loading, error } = UsePaginatedDataFetch(getBooks({currentPage, pageSize }, filters)));
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+    if (error) {
+        return <div>Error occurred: {error.message}.</div>;
+    }
+    if (!data) {
+        return <div>Data is not available.</div>;
+    }
+
+    const { books, total } = data;
+
     useEffect(() => {
         const fetchBooks = async () => {
-            const { books, total } = await getBooks(currentPage, filters)
+            const { books, total } = await getBooks({currentPage, 10}, filters)
             setBooks(books)
             setTotalPages(Math.ceil(total / 10))
         }

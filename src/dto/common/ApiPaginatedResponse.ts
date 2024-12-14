@@ -1,8 +1,6 @@
-export interface ApiPaginatedResponse<T> {
-    message: string;
-    responseCode: number;
-    data?: T;
-    errorMessage?: string;
+import {ApiResponse} from "@/dto/common/ApiResponse.ts";
+
+export interface ApiPaginatedResponse<T> extends ApiResponse<T> {
     metadata: {
         total: number,
         currentPage: number,

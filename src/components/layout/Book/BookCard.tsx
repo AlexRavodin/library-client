@@ -1,7 +1,7 @@
 import {Link} from 'react-router-dom'
 import {Card, CardContent, CardFooter} from "@/components/ui/card"
 import {Button} from "@/components/ui/button"
-import {Book} from '@/dto/Book/Book.ts'
+import {Book} from '@/dto/book/Book.ts'
 
 interface BookCardProps {
     book: Book;

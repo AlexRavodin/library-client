@@ -1,4 +1,4 @@
-import {User} from "@/dto/User.ts";
+import {User} from "@/dto/user/User.ts";
 
 export interface AuthContextType {
     user: User | null;

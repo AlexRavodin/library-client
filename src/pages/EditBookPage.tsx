@@ -5,11 +5,11 @@ import {Label} from "@/components/ui/label"
 import {Button} from "@/components/ui/button"
 import {Select} from "@/components/ui/select"
 import {Card, CardHeader, CardTitle, CardContent, CardFooter} from "@/components/ui/card"
-import {Book} from '@/dto/Book/Book.ts'
-import Author from '@/dto/Author/Author.ts'
-import Genre from '@/dto/Genre/Genre.ts'
+import {Book} from '@/dto/book/Book.ts'
+import Author from '@/dto/author/Author.ts'
+import Genre from '@/dto/genre/Genre.ts'
 import {getBookById, getAuthors, getGenres, updateBook} from '@/utils/api'
-import GenreItem from "@/dto/Genre/GenreItem.ts";
+import GenreItem from "@/dto/genre/GenreItem.ts";
 
 export function EditBookPage() {
     const {id} = useParams<{ id: string }>()

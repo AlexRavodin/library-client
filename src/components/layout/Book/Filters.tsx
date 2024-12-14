@@ -3,9 +3,12 @@ import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Checkbox} from "@/components/ui/checkbox"
 import {Button} from "@/components/ui/button"
-import {BookFilters} from '@/dto/Book/BookFilters.ts'
-import {getGenres} from '@/utils/api'
-import GenreItem from "@/dto/Genre/GenreItem.ts";
+import {BookFilters} from '@/dto/book/BookFilters.ts'
+import {getBooks, getGenres} from '@/utils/api'
+import Genre from "@/dto/genre/Genre.ts";
+import {UsePaginatedDataFetch} from "@/hooks/UsePaginatedDataFetch.ts";
+import {UseDataFetch} from "@/hooks/UseDataFetch.ts";
+import {ApiResponse} from "@/dto/common/ApiResponse.ts";
 
 interface FiltersProps {
     onFilterChange: (filters: BookFilters) => void;
@@ -14,8 +17,10 @@ interface FiltersProps {
 export function Filters({onFilterChange}: FiltersProps) {
     const [title, setTitle] = useState('')
     const [author, setAuthor] = useState('')
-    const [genres, setGenres] = useState<GenreItem[]>([])
-    const [selectedGenres, setSelectedGenres] = useState<string[]>([])
+    const [genres, setGenres] = useState<Genre[]>([])
+    const [selectedGenres, setSelectedGenres] = useState<Genre[]>([])
+
+    const { data, loading, error } = UseDataFetch<Genre[]>(getGenres);
 
     useEffect(() => {
         getGenres().then(setGenres)
@@ -54,13 +59,13 @@ export function Filters({onFilterChange}: FiltersProps) {
                             key={genre.id}
                             id={`genre-${genre.id}`}
                             label={genre.name}
-                            checked={selectedGenres.includes(genre.id)}
+                            checked={selectedGenres.some(g => g.id === genre.id)}
                             onChange={(e) => {
                                 setSelectedGenres(
                                     e.target.checked
-                                        ? [...selectedGenres, genre.id]
-                                        : selectedGenres.filter((id) => id !== genre.id)
-                                )
+                                        ? [...selectedGenres, ...genres.filter(g => g.id === genre.id)]
+                                        : selectedGenres.filter(g => g.id !== genre.id)
+                                );
                             }}
                         />
                     ))}

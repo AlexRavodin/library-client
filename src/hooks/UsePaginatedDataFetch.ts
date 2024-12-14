@@ -1,9 +1,10 @@
 ﻿import {useEffect, useState} from "react";
 import {AxiosError} from "axios";
 import CustomError from "@/utils/CustomError.ts";
-import {ApiResponse} from "@/dto/common/ApiResponse.ts";
+import {ApiPaginatedResponse} from "@/dto/common/ApiPaginatedResponse.ts";
 
-export const UseDataFetch = <T>(fetchingFunction: () => Promise<ApiResponse<T>>): {
+export const UsePaginatedDataFetch = <T>(fetchingFunction: () =>
+    Promise<ApiPaginatedResponse<T>>): {
     data: T | null;
     loading: boolean;
     error: CustomError | null

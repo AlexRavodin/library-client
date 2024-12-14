@@ -1,3 +1,3 @@
-﻿export default interface Error {
+﻿export default interface CustomError {
     message: string;
 }

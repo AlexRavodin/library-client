@@ -13,7 +13,7 @@ export function BookCard({book}: BookCardProps) {
             <CardContent className="p-4">
                 <div className="aspect-[3/4] relative mb-4">
                     <img
-                        src={book.image_url}
+                        src={book.image_url ?? "/placeholder.svg?height=300&width=200"}
                         alt={`Cover of ${book.title}`}
                         className="object-cover rounded-md w-full h-full"
                     />

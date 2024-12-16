@@ -6,11 +6,9 @@ const LogoutPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulating logout process
     const logout = async () => {
-      // Here you would typically call your logout API
       await new Promise(resolve => setTimeout(resolve, 1000));
-      // After logout, redirect to home page
+
       navigate('/');
     };
     logout();

@@ -1,14 +1,12 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Checkbox} from "@/components/ui/checkbox"
 import {Button} from "@/components/ui/button"
 import {BookFilters} from '@/dto/book/BookFilters.ts'
-import {getBooks, getGenres} from '@/utils/api'
 import Genre from "@/dto/genre/Genre.ts";
-import {UsePaginatedDataFetch} from "@/hooks/UsePaginatedDataFetch.ts";
 import {UseDataFetch} from "@/hooks/UseDataFetch.ts";
-import {ApiResponse} from "@/dto/common/ApiResponse.ts";
+import {loading as Loading} from "@/components/ui/loading.tsx";
 
 interface FiltersProps {
     onFilterChange: (filters: BookFilters) => void;
@@ -17,18 +15,23 @@ interface FiltersProps {
 export function Filters({onFilterChange}: FiltersProps) {
     const [title, setTitle] = useState('')
     const [author, setAuthor] = useState('')
-    const [genres, setGenres] = useState<Genre[]>([])
     const [selectedGenres, setSelectedGenres] = useState<Genre[]>([])
 
-    const { data, loading, error } = UseDataFetch<Genre[]>(getGenres);
+    const {data: genres, loading, error} = UseDataFetch<Genre[]>("/genres");
 
-    useEffect(() => {
-        getGenres().then(setGenres)
-    }, [])
+    if (loading) {
+        return <Loading></Loading>;
+    }
+    if (error) {
+        return <div>Error occurred: {error.errorMessage}.</div>;
+    }
+    if (!genres) {
+        return <div>Data is not available.</div>;
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onFilterChange({title, author, genres: selectedGenres})
+        onFilterChange({title, author, genreIds: selectedGenres.map(genre => genre.id)})
     }
 
     return (

@@ -10,12 +10,11 @@ const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
-    const [dateOfBirth, setDateOfBirth] = useState('')
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         // Here you would typically handle the registration logic
-        console.log('Registration attempt with:', {name, email, password, confirmPassword, dateOfBirth})
+        console.log('Registration attempt with:', {name, email, password, confirmPassword})
     }
 
     return (
@@ -66,16 +65,6 @@ const RegisterPage: React.FC = () => {
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                            <Input
-                                id="dateOfBirth"
-                                type="date"
-                                value={dateOfBirth}
-                                onChange={(e) => setDateOfBirth(e.target.value)}
                                 required
                             />
                         </div>

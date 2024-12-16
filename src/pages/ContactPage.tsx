@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { FaGithub, FaLinkedin } from 'react-icons/fa';
+import {Button} from "@/components/ui/button";
+import {FaGithub, FaLinkedin} from 'react-icons/fa';
 import {Link} from "react-router-dom";
 
 const ContactPage: React.FC = () => {
@@ -25,7 +25,7 @@ const ContactPage: React.FC = () => {
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="flex flex-col items-center space-y-8 text-center">
                         <img
-                            src="https://avatars.githubusercontent.com/u/55300023?v=4"
+                            src="https://avatars.githubusercontent.com/u/91945858?v=4"
                             alt="Alex Ravodin"
                             className="w-32 h-32 rounded-full"
                         />
@@ -41,13 +41,13 @@ const ContactPage: React.FC = () => {
                         <div className="flex space-x-4">
                             <Button variant="outline" asChild>
                                 <Link to="https://github.com/AlexRavodin" target="_blank" rel="noopener noreferrer">
-                                    <FaGithub className="mr-2" />
+                                    <FaGithub className="mr-2"/>
                                     GitHub
                                 </Link>
                             </Button>
                             <Button variant="outline" asChild>
-                                <Link to="https://www.linkedin.com/in/alex-ravodin-b5b1b1b1/" target="_blank" rel="noopener noreferrer">
-                                    <FaLinkedin className="mr-2" />
+                                <Link to="www.linkedin.com/in/alex-ravodin" target="_blank" rel="noopener noreferrer">
+                                    <FaLinkedin className="mr-2"/>
                                     LinkedIn
                                 </Link>
                             </Button>

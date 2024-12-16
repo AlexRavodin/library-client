@@ -6,7 +6,7 @@ export interface Book {
     title: string;
     amount: number;
     description: string;
-    image_url: string;
+    image_url: string | null;
     author: Author;
     genres: Genre[];
 }

@@ -1,9 +1,9 @@
 ﻿import {useEffect, useState} from "react";
-import {AxiosError} from "axios";
 import CustomError from "@/utils/CustomError.ts";
-import {ApiResponse} from "@/dto/common/ApiResponse.ts";
+import {baseAxios} from "@/utils/constants.ts";
 
-export const UseDataFetch = <T>(fetchingFunction: () => Promise<ApiResponse<T>>): {
+export const UseDataFetch = <T>
+(url: string, params?: { [key: string]: unknown }): {
     data: T | null;
     loading: boolean;
     error: CustomError | null
@@ -13,23 +13,37 @@ export const UseDataFetch = <T>(fetchingFunction: () => Promise<ApiResponse<T>>)
     const [error, setError] = useState<CustomError | null>(null);
 
     useEffect(() => {
-        const getter = async () => {
+        const apiCall = async () => {
+            if (params) {
+                console.log("Params: " + JSON.stringify(params));
+            }
+
+            setLoading(true);
             try {
-                setLoading(true);
-                const result = await fetchingFunction();
-                if (result.errorMessage !== null) {
-                    setError({message: result.errorMessage} as CustomError);
+                const response =
+                    await baseAxios.get(url, {
+                    params: params
+                });
+
+                if (response.status == 200) {
+                    console.log("Check:" + JSON.stringify(response.data?.data as T));
+                    setData(response.data?.data as T);
                 } else {
-                    setData(result.data ?? null);
+                    setError(response.data as CustomError);
                 }
             } catch (error) {
-                setError(error as AxiosError);
+                if (error as CustomError) {
+                    setError(error as CustomError);
+                }
+                setError({statusCode: 404, errorMessage:
+                        "Unknown error", errors: null});
             } finally {
                 setLoading(false);
             }
         };
 
-        getter();
-    }, [fetchingFunction]);
+        apiCall();
+    }, [JSON.stringify(params), url]);
+
     return {data, loading, error};
 };

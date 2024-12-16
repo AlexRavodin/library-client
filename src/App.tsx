@@ -11,6 +11,9 @@ import {EditBookPage} from "@/pages/EditBookPage.tsx";
 import ContactPage from "@/pages/ContactPage.tsx";
 import AboutPage from "@/pages/AboutPage.tsx";
 import AuthProvider from "@/utils/AuthProvider.tsx";
+import Unauthorized from "@/pages/Unathorized.tsx";
+import {CreateBookPage} from "@/pages/CreateBookPage.tsx";
+import LoanListPage from "@/pages/LoanListPage.tsx";
 
 function App() {
     return (
@@ -18,6 +21,7 @@ function App() {
             <AuthProvider>
                 <div className="app-container">
                     <Navigation/>
+
                     <main className="main-content">
                         <Routes>
                             <Route path="/" element={<LandingPage/>}/>
@@ -25,9 +29,12 @@ function App() {
                             <Route path="/signup" element={<RegisterPage/>}/>
                             <Route path="/logout" element={<LogoutPage/>}/>
                             <Route path="/books" element={<BookCatalogPage/>}/>
-                            <Route path="/books/:id" element={<EditBookPage/>}/>
+                            <Route path="/books/:stringId" element={<EditBookPage/>}/>
+                            <Route path="/books/create" element={<CreateBookPage/>}/>
                             <Route path="/contact" element={<ContactPage/>}/>
                             <Route path="/about" element={<AboutPage/>}/>
+                            <Route path="/unauthorized" element={<Unauthorized/>}/>
+                            <Route path="/loans" element={<LoanListPage/>}/>
                         </Routes>
                     </main>
 

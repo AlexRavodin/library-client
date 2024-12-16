@@ -1,90 +1,120 @@
 ﻿import React, {createContext, useContext, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import axios from 'axios';
 import {User} from "@/dto/user/User.ts";
-import {API_BASE_URL} from "@/utils/constants.ts";
 import {AuthContextType} from "@/context/AuthContext.ts";
+import {baseAxios} from "@/utils/constants.ts";
+import CustomError from "@/utils/CustomError.ts";
 
-const Axios = axios.create({
-    baseURL: `${API_BASE_URL}/auth`
-});
 
 export interface AuthProviderProps {
     children: React.ReactNode;
 }
 
+const fetchUser = async (): Promise<User | null> => {
+    try {
+        const response = await baseAxios.get('users/info');
+
+        if (response.status === 200) {
+            console.log("User fetched: " + JSON.stringify(response.data.data as User));
+            return response.data.data as User;
+        }
+
+        const error = response.data as CustomError;
+        if (response.status == 401) {
+            console.error('Not authorized: ', error.errorMessage);
+        } else {
+            console.error('Other error: ', error.errorMessage);
+        }
+
+    } catch (error) {
+        console.error('Unknown error: ', error);
+    }
+
+    return null;
+};
+
 const AuthProvider = ({children}: AuthProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string): Promise<CustomError | null> => {
         try {
-            const response = await Axios.post('/login', {
+            //setLoading(true);
+            const response = await baseAxios.post("auth/login", {
                 email,
                 password
-            }, {
-                withCredentials: true,
             });
-            const res: User = response.data;
-            if (res) {
-                setUser(res);
+
+            if (response.status == 200) {
+                const user = await fetchUser();
+                setUser(user);
+                console.log("User logged in.");
+                navigate("/");
+                return null;
+            } else {
+                const error = response.data as CustomError;
+                //setError(error)
+                return error;
             }
-        } catch (error: unknown) {
-            console.error('Unknown error while login: ', error);
+        } catch (err) {
+            const error = {statusCode: 404, errorMessage: "Unknown error: " + err, errors: null};
+
+            //setError(error);
+            return error;
+        } finally {
+            //setLoading(false);
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
         setUser(null);
-        localStorage.removeItem('token');
+        try {
+            //setLoading(true);
+            const response = await baseAxios.post("auth/logout");
+
+            if (response.status == 200) {
+                console.log("User logged out.");
+            } else {
+                //setError(response.data as CustomError)
+            }
+        } catch (error) {
+            console.log('Unknown error: ', error);
+            //setError({ statusCode: 404, errorMessage: "Unknown error: " + error, errors: null});
+        } finally {
+            //setLoading(false);
+        }
 
         console.log("User logged out.");
-        navigate('/login');
-    };
-
-    const fetchUserData = async () => {
-        try {
-            const response = await Axios.get('/user-info', {
-                withCredentials: true,
-            });
-
-            setUser(response.data);
-
-            if (response.status == 401) {
-                console.error('Not authorized: ', response.data);
-                navigate('/login');
-            }
-
-            const userData = response.data;
-            setUser(userData);
-        } catch (error) {
-            console.error('Error: ', error);
-        }
+        navigate('/');
     };
 
     useEffect(() => {
-        fetchUserData();
-    }, [fetchUserData, user]);
-
+        (async () => {
+            const user = await fetchUser();
+            setUser(user);
+        })();
+    }, []);
 
 
     return (
-        <AuthContext.Provider value={{user, login: login, logout, fetchUserData}}>
+        <AuthContext.Provider value={{user, login, logout}}>
             {children}
         </AuthContext.Provider>
     );
 
 }
 
+export default AuthProvider;
+
 const InitialState: AuthContextType = {
     user: null,
-    login: async () => Promise.resolve(),
-    logout: () => {},
-    fetchUserData: async () => Promise.resolve(),
+    login: async (): Promise<CustomError | null> => Promise.resolve(null),
+    logout: async () => Promise.resolve(),
 };
 
-const AuthContext = createContext<AuthContextType>(InitialState);
+export const AuthContext = createContext<AuthContextType>(InitialState);
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    return useContext(AuthContext)
+}
 
-export default AuthProvider;

@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card"
+import {useAuth} from "@/utils/AuthProvider.tsx";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const {login} = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle the login logic
     console.log('Login attempt with:', { email, password });
+
+    const loginError = await login(email, password);
+
+    if (loginError !== null){
+      setError("Error occurred: " + loginError.errorMessage + "." + " " + loginError.errors?.reduce((result, e) => result + e));
+    }
+
   };
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -48,6 +59,7 @@ const LoginPage: React.FC = () => {
             <Button type="submit" className="w-full">
               Sign In
             </Button>
+            {error && <div>Error: {error}</div>}
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">

@@ -1,3 +1,5 @@
 ﻿export default interface CustomError {
-    message: string;
+    statusCode: number;
+    errorMessage: string | null;
+    errors: string[] | null;
 }

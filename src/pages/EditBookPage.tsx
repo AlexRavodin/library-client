@@ -1,49 +1,62 @@
-import React, {useState, useEffect} from 'react'
-import {useParams, useNavigate} from 'react-router-dom'
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {Button} from "@/components/ui/button"
-import {Select} from "@/components/ui/select"
-import {Card, CardHeader, CardTitle, CardContent, CardFooter} from "@/components/ui/card"
-import {Book} from '@/dto/book/Book.ts'
-import Author from '@/dto/author/Author.ts'
-import Genre from '@/dto/genre/Genre.ts'
-import {getBookById, getAuthors, getGenres, updateBook} from '@/utils/api'
-import GenreItem from "@/dto/genre/GenreItem.ts";
+import React, {useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Button} from "@/components/ui/button";
+import {Select} from "@/components/ui/select";
+import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Book} from '@/dto/book/Book.ts';
+import Author from '@/dto/author/Author.ts';
+import Genre from '@/dto/genre/Genre.ts';
+import {UseMultipleDataFetch} from "@/hooks/UseMultipleDataFetch.ts";
+import {loading as Loading} from "@/components/ui/loading.tsx"
 
 export function EditBookPage() {
-    const {id} = useParams<{ id: string }>()
+    const {stringId} = useParams<{ stringId: string }>();
+    const id = parseInt(stringId!, 10);
+
     const navigate = useNavigate()
-    const [book, setBook] = useState<Book | null>(null)
-    const [authors, setAuthors] = useState<Author[]>([])
-    const [genres, setGenres] = useState<Genre[]>([])
-    const [selectedGenres, setSelectedGenres] = useState<GenreItem[]>([])
+    const [selectedGenres, setSelectedGenres] = useState<Genre[]>([])
     const [genreSearch, setGenreSearch] = useState('')
     const [coverFile, setCoverFile] = useState<File | null>(null)
+    const [newBook, setNewBook] = useState<Book | null>(null)
 
-    useEffect(() => {
-        if (id) {
-            getBookById(id).then(setBook)
-            getAuthors().then(setAuthors)
-            getGenres().then(setGenres)
-        }
-    }, [id])
+    const {data, loading, error} = UseMultipleDataFetch([`books/${id}`, "authors", "genres"]);
+
+    const genres = data?.at(2) as Genre[] ?? [];
+    const authors = data?.at(1) as Author[] ?? [];
+    const book = data?.at(0) as Book ?? null;
 
     useEffect(() => {
         if (book) {
-            setSelectedGenres(book.genres.map(g => { g.id, g.name]}))
+            setNewBook(book);
+            setSelectedGenres(book.genres);
         }
     }, [book])
 
+    if (loading) {
+        return <Loading></Loading>;
+    }
+    if (error) {
+        return <div>Error occurred: {error.errorMessage}.</div>;
+    }
+    if (!data || !book) {
+        return <div>Data is not available.</div>;
+    }
+
+
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (book) {
-            const updatedBook = {...book, genre: selectedGenres}
+        e.preventDefault();
+        if (newBook) {
+            const updatedBook = {...newBook, genres: selectedGenres};
             if (coverFile) {
-                updatedBook.image_url = URL.createObjectURL(coverFile)
+                updatedBook.image_url = URL.createObjectURL(coverFile);
             }
-            await updateBook(updatedBook)
-            navigate(`/books/${book.id}`)
+            console.log(updatedBook);
+
+            //await updateBook(updatedBook)
+
+            navigate(`/books/${book.id}`);
         }
     }
 
@@ -51,13 +64,16 @@ export function EditBookPage() {
         genre.name.toLowerCase().includes(genreSearch.toLowerCase())
     )
 
-    if (!book) return <div>Loading...</div>
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {id, value} = e.target;
+        setNewBook((prevBook) => ({...prevBook!, [id]: value,}));
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
             <Card className="w-full max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle>Edit Book: {book.title}</CardTitle>
+                    <CardTitle>Edit Book: {book!.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -65,8 +81,8 @@ export function EditBookPage() {
                             <Label htmlFor="title">Title</Label>
                             <Input
                                 id="title"
-                                value={book.title}
-                                onChange={(e) => setBook({...book, title: e.target.value})}
+                                value={newBook?.title ?? book?.title}
+                                onChange={handleInputChange}
                                 required
                             />
                         </div>
@@ -75,15 +91,15 @@ export function EditBookPage() {
                             <Select
                                 className="main-content"
                                 id="author"
-                                value={book.author.first_name}
-                                onChange={(e) => setBook(
-                                    {...book, author: e.target.value}
+                                value={newBook?.author.id ?? book?.author.id}
+                                onChange={(e) => setNewBook(
+                                    {...book!, author: authors.find(a => a.id === parseInt(e.target.value))!}
                                 )}
                                 required
                             >
                                 {authors.map((author) => (
-                                    <option key={author.id} value={author.name}>
-                                        {author.name}
+                                    <option key={author.id} value={author.id}>
+                                        {`${author.last_name} - ${author.first_name}`}
                                     </option>
                                 ))}
                             </Select>
@@ -102,12 +118,14 @@ export function EditBookPage() {
                                     <label key={genre.id} className="flex items-center space-x-2">
                                         <input
                                             type="checkbox"
-                                            checked={selectedGenres.includes(genre.name)}
+                                            checked={selectedGenres.some(g => g.id === genre.id)}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
-                                                    setSelectedGenres([...selectedGenres, genre.name])
+                                                    console.log("Genre added: " + genre.name);
+                                                    setSelectedGenres([...selectedGenres, ...genres.filter(g => g.id === genre.id)]);
                                                 } else {
-                                                    setSelectedGenres(selectedGenres.filter(g => g !== genre.name))
+                                                    console.log("Genre removed: " + genre.name);
+                                                    setSelectedGenres(selectedGenres.filter(g => g.id !== genre.id))
                                                 }
                                             }}
                                         />
@@ -125,11 +143,11 @@ export function EditBookPage() {
                                 onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
                             />
                         </div>
-                        {(book.image_url || coverFile) && (
+                        {(book?.image_url || coverFile) && (
                             <div>
                                 <Label>Current Cover</Label>
                                 <img
-                                    src={coverFile ? URL.createObjectURL(coverFile) : book.image_url}
+                                    src={coverFile ? URL.createObjectURL(coverFile) : (book?.image_url ?? "/placeholder.svg?height=300&width=200")}
                                     alt="Book cover"
                                     className="w-32 h-48 object-cover"
                                 />
